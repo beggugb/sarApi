@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "ileana2020",
+    "database": "sar",
+    "host": "192.168.0.250",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "sar",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "postgres",
+    "password": "ileana2020",
+    "database": "sar",
+    "host": "192.168.0.250",
+    "dialect": "postgres"
+  }
+}
