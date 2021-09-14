@@ -26,8 +26,9 @@ function sendMensaje(mensaje, token)
         /*to:  "ExponentPushToken[bGIfs1F0uGvHtBaY8_gSCQ]",*/
         to: token,
         sound: 'default',
-        /*body: "`expo-notifications` will never see this 😢",*/
-        body: mensaje,
+        title:'Algo',
+        body: "`expo-notifications` will never see this 😢",
+        /*body: mensaje,*/
         data: { withSome: 'goes here' },
       })
  let chunks = expo.chunkPushNotifications(messages); 
