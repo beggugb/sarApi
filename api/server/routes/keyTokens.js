@@ -4,9 +4,10 @@ const KeyTokens = express.Router();
 
 KeyTokens.use(function(req,res,next){
     var token = req.headers['x-access-tokens'];
-    var tokeLocal = 'sari2019xvfgrtre2021*00*wsqert' 	
-    
-    if(!token){
+    var tokeLocal = "sari2019xvfgrtre2021*00*wsqert" 	
+    console.log(token)
+    console.log(tokeLocal)	
+    if(token === null || token === ''){
         return res.status(403).json({auth:false, message: "Sin Token"});
     }
 

@@ -59,6 +59,7 @@ class FilesController {
   }
 
   static empresa(req, res) {
+	 console.log(req.body) 
     Promise.all([FilesService.uploade(req, res)])
       .then(([file]) => {
         const art = {}
@@ -69,7 +70,7 @@ class FilesController {
               })
       })
       .catch(reason => {
-
+	console.log(reason)
         res.status(400).send({ 'message': reason })
       })
 

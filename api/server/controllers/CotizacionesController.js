@@ -50,6 +50,7 @@ class CotizacionesController {
   static item(req, res) {                 
     Promise.all([CotizacionService.getItem(req.params.id), AutoService.getItem(req.params.id)]) 
       .then(([cotizacion,auto]) => {             
+	      console.log(auto)
         Promise.all([         
           ProductoCompaniaService.getAll(cotizacion.productoId)
         ]) 

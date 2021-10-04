@@ -243,8 +243,10 @@ static getAll(usuarioId,rolId,pag,num) {
         order: [['id','DESC']],       
         attributes: ["id"],	      
         include: [{ model: Cotizacion, 
-		    attributes: ["id", "productoId","ivigencia","valor"],
-		    where: { cliente: clienteId }},		  
+		    attributes: ["id", "productoId","ivigencia","valor","createdAt"],
+		    where: { cliente: clienteId },
+		    include: [{ model: Cliente,attributes: ['nombres','direccion','telefono','email']}]	
+	          },		  
 		  { model: Modelo, attributes: ["id", "nombre","filename"]},
 		  { model: Marca, attributes: ["id", "nombre"]},
 	        ]
