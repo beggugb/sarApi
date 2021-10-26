@@ -8,6 +8,28 @@ const { NotaCobranza } = database;
 
 class NotaCobranzaService {
 
+  static data(pag,num,prop,value){
+    return new Promise((resolve,reject) =>{
+      let page = parseInt(pag);
+      let der = num * page - num;
+      NotaCobranza.findAndCountAll({
+          raw: true,
+          nest: true,
+          offset: der,
+          limit: num,
+          order: [[prop,value]],
+          attributes:["id","nombres","direccion","email","telefono","celular","ci","tipo"] 
+        })
+        .then((rows) => resolve({
+          paginas: Math.ceil(rows.count / num),
+          pagina: page,
+          total: rows.count,
+          data: rows.rows
+        }))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+
   static update(dato, datoId) {
     return new Promise((resolve, reject) => {
       NotaCobranza.update(dato, { where: { id: Number(datoId) } })

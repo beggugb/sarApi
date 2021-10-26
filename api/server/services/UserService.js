@@ -10,90 +10,23 @@ const { Usuario, Sucursal, Rol } = database;
 
 class UsuarioService {
 
-    static validarUsuario(newUsuario) {    
-        if(newUsuario.nombre){
-            if(newUsuario.username){
-                if(newUsuario.rolId){                
-                      return true                
-              }
-            }
-        }
-        else {
-            return false
-        }
-        
-    }
-  
-   static add(newUsuario) {    
-    return new Promise((resolve, reject) => {
-        if(this.validarUsuario(newUsuario))
-        {            
-            Usuario.create(newUsuario)
-            .then((usuario) => {
-                let payload = {usuario_id: usuario.id, username: usuario.username }
-                let token = jwt.sign(payload,"erp2020",{
-                    expiresIn: "2629746000"
-                });
-                resolve({ auth: true, message: "Usuario registrado", Usuario: usuario, token: token })
-            })
-            .catch((reason) => {                
-                reject({ auth: false, message: reason, Usuario: null, token: null })
-              });
-            
-        }else{                
-                reject({ auth: false, message: "Datos faltantes", Usuario: null, token: null })
-        }        
-   });
-  } 
-
-
-
-
-/*static getAll(pag,num,prop,orden) {
-    return new Promise((resolve, reject) => {
-      let page = parseInt(pag);
-      let der = num * page - num;
-      Usuario.findAndCountAll({
-        raw: true,
-        nest: true,
-        offset: der,
-        limit: num,
-        order: [[prop, orden]],        
-        attributes: ["id","name","Usuarioname","enabled"],
-        include: [
-                    { model: Rol, attributes: ["id", "nameRol"]},
-                    { model: Sucursal, attributes: ["id", "nombre"]}
-                 ]
-      })
-        .then((usuarios) =>
-          resolve({
-            paginas: Math.ceil(usuarios.count / num),
-            pagina: page,
-            total: usuarios.count,
-            data: usuarios.rows,
-          })
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
-*/
   static login(username, password) {        
     return new Promise((resolve, reject) => {
-      Usuario.findOne({
-        where: { username: { [Op.eq]: username } }                
+      Usuario.findOne({        
+        where: { username: { [Op.eq]: username } },  
+        attributes: ['id','nombre','username','password','rolId','sucursalId']
       }).then((user) => {
         if (!user) {          
           resolve({
             success: false,
             message: "Authentication fallida . Usuario no existe.",
             usuario: null,
-            token: null		  
           });
         } else {          
           user.comparePassword(password, (err, isMatch) => {            
             if (isMatch && !err) {
               let payload = { user_id: user.id, username: user.username };
-              let token = jwt.sign(payload, "sar2021", {
+              let token = jwt.sign(payload, "unityErp2021", {
                 expiresIn: "2629746000",
               });
               resolve({
@@ -107,7 +40,6 @@ class UsuarioService {
                 success: false,
                 message: "Autenticación fallida. contraseña incorrecta.",
                 usuario: null,
-		token: null      
               });              
             }
           });
@@ -116,108 +48,105 @@ class UsuarioService {
     });
   }
 
-  static getItem(datoId) {
-    return new Promise((resolve, reject) => {
-      Usuario.findByPk(datoId,{
-         include: [
-          { model: Sucursal, attributes: ["id", "nombre"]}
-        ]
-
-      })
-        .then((usuario) => resolve(usuario))
-        .catch((reason) => reject(reason));
-    });
-  }
-
-  static update(dato, datoId) {
-    const userNew = dato
-    userNew.password =  bcrypt.hashSync(dato.password, bcrypt.genSaltSync(10), null);  
-    return new Promise((resolve, reject) => {
-      Usuario.update(userNew, { where: { id: Number(datoId) } })
-        .then((usuario) => resolve(usuario))
-        .catch((reason) => reject(reason));
-    });
-  }
-
-  static delete(datoId) {
-    return new Promise((resolve, reject) => {
-      Usuario.destroy({ where: { id: Number(datoId) } })
-        .then((Usuario) => resolve(Usuario))
-        .catch((reason) => reject(reason));
-    });
-  }
-  
-  static getAll(pag,num,prop,orden) {  
-   return new Promise((resolve, reject) => {
+  static data(pag,num,prop,value){
+    return new Promise((resolve,reject) =>{
       let page = parseInt(pag);
       let der = num * page - num;
-      Usuario.findAndCountAll({
-        raw: true,
-        nest: true,
-        offset: der,
-        limit: num,
-        order: [[prop, orden]],	      
-        include: [
-          { model: Rol, attributes: ["id", "nombre"]}
-        ]     
-
-      })
-        .then((Usuarios) =>
-          resolve({
-            paginas: Math.ceil(Usuarios.count / num),
-            pagina: page,
-            total: Usuarios.count,
-            data: Usuarios.rows,
+        Usuario.findAndCountAll({
+          raw: true,
+          nest: true,
+          offset: der,
+          limit: num,
+          order: [[prop,value]],
+          attributes:["id","codigo","nombres","email","direccion","tipo","nit","filename","telefono"] 
+        })
+        .then((rows) => resolve({
+          paginas: Math.ceil(rows.count / num),
+          pagina: page,
+          total: rows.count,
+          data: rows.rows
+        }))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+static list(prop,value){
+    return new Promise((resolve,reject) =>{
+        Usuario.findAll({
+          raw: true,
+          nest: true,                
+          order: [[prop,value]],
+          attributes:[[prop,'label'],['id','value']]  
           })
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
-
-  static search(pag,num,prop,orden,name,nit,tipo) {    	
-    return new Promise((resolve, reject) => {
-      let page = parseInt(pag);
-      let der = num * page - num;      
-      let iName = '%' + name + '%'
-      if (name === '--todos--' || name === null || name === '0') { iName = '%' }
-      
-
-      Usuario.findAndCountAll({
-        raw: true,
-        nest: true,
-        offset: der,
-        limit: num,
-        order: [[prop, orden]],    
-        where: {
-          [Op.and]: [            
-            { name: { [Op.iLike]: iName } }            
-          ]
-        }
-      })
-        .then((Usuarios) =>
-          resolve({
-            paginas: Math.ceil(Usuarios.count / num),
-            pagina: page,
-            total: Usuarios.count,
-            data: Usuarios.rows,
-          })
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
-
-    static listas() {
-    return new Promise((resolve, reject) => {
-       Usuario.findAll({
-        attributes: [["id","value"],["nombre","label"]],
-        order: [['nombre','ASC']]
-       })
-         .then((usuarios) =>
-           resolve(usuarios)
-         )
-         .catch((reason) => reject(reason));
-     });
-   }
+        .then((row) => resolve(row))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+static item(id){
+    return new Promise((resolve,reject) =>{
+        Usuario.findByPk(id,{
+          raw: true,
+          nest: true
+        })
+        .then((row)=> resolve( row ))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+static items(prop,value){
+    return new Promise((resolve,reject) =>{            
+        Usuario.findAll({
+          raw: true,
+          nest: true,                
+          order: [[prop,value]],
+          attributes:["id","codigo","nombres","direccion"]                             
+        })
+        .then((rows) => resolve(rows))
+        .catch((reason) => reject({ message: reason.message }))            
+    })
+}
+static update(value,id){
+    return new Promise((resolve,reject) =>{
+        Usuario.update(value, { where: { id: Number(id) } })
+        .then((row)=> resolve( row ))
+        .catch((reason) => reject({ message: reason.message })) 
+    })
+}
+static delete(id){
+    return new Promise((resolve,reject) =>{
+        Usuario.destroy({ where: { id: Number(id) } })
+        .then((cliente) => resolve(cliente))
+        .catch((reason)  => reject(reason));
+    })
+}
+static add(value){
+    return new Promise((resolve,reject) =>{
+        Usuario.create(value)
+        .then((row) => resolve( row ))
+        .catch((reason)  => reject({ message: reason.message }))  
+    })
+}  
+static search(prop,value){
+    return new Promise((resolve,reject) =>{            
+        let iValue = '%' + value + '%'
+        if (value === '--todos--' || value === null || value === '0') { iValue = '%' }            
+        Usuario.findAndCountAll({
+            raw: true,
+            nest: true,
+            offset: 0,
+            limit: 12,
+            where: { [prop]: { [Op.iLike]: iValue }},
+            order: [[prop,'ASC']],
+            attributes:["id","codigo","nombres","email","direccion","tipo","nit","filename","telefono"] 
+        })		
+        .then((rows) => resolve({
+            paginas: Math.ceil(rows.count / 12),
+            pagina: 1,
+            total: rows.count,
+            data: rows.rows
+        } 
+  ))
+    .catch((reason)  => reject({ message: reason.message })) 
+    })
+}  
 	
 
   

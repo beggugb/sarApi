@@ -10,7 +10,7 @@ const { Modulo } = database;
 
 class ModuloService {
     
-  static getAll(rolId) {  
+  static data(rolId) {  
    return new Promise((resolve, reject) => {
       Modulo.findAll({
         where: { rolId: rolId} ,

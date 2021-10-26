@@ -8,4 +8,5 @@ router.post('/polizas',InformesController.polizas)
 router.post('/comisiones',InformesController.comisiones)
 router.post('/agentes',InformesController.agentes)
 router.get('/campanas',InformesController.campanas)
+router.post('/dashboard',InformesController.dashboard)
 export default router;

@@ -15,7 +15,7 @@ class EmpresaService {
     });
   }
 
-  static getItem(datoId) {
+  static item(datoId) {
     return new Promise((resolve, reject) => {
       Empresa.findByPk(datoId)
         .then((empresa) => resolve(empresa))

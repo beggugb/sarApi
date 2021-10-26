@@ -7,6 +7,36 @@ const Op = Sequelize.Op;
 const { Poliza, Cliente, Usuario, Producto, Ramo, Compania } = database;
 
 class PolizaService {
+
+
+  static data(pag,num, prop, orden) {  
+    return new Promise((resolve, reject) => {
+       let page = parseInt(pag);
+       let der = num * page - num;
+       Poliza.findAndCountAll({
+         raw: true,
+         nest: true,
+         offset: der,
+         limit: num,
+         order: [[prop,orden]],
+         attributes: ["id", "primaTotal","ivigencia","fvigencia"],      
+            include: [
+            { model: Cliente, attributes: ["id", "nombres","email"]},
+            { model: Producto, attributes: ["id", "nombre"]},	
+            { model: Ramo, attributes: ["id", "nombre"]}
+        ],      
+       })
+         .then((polizas) =>
+           resolve({
+             paginas: Math.ceil(polizas.count / num),
+             pagina: page,
+             total: polizas.count,
+             data: polizas.rows,
+           })
+         )
+         .catch((reason) => reject(reason));
+     });
+   }
     
    static add(newPoliza) {    
     return new Promise((resolve, reject) => {
@@ -69,36 +99,7 @@ class PolizaService {
     });
   }
  
-static getAll(pag,num) {
-  
-   return new Promise((resolve, reject) => {
-      let page = parseInt(pag);
-      let der = num * page - num;
-      Poliza.findAndCountAll({
-        raw: true,
-        nest: true,
-        offset: der,
-        limit: num,
-        order: [['id','DESC']],
-	attributes: ["id", "primaTotal","ivigencia","fvigencia"],      
-	include: [
-            { model: Cliente, attributes: ["id", "nombres","email"]},
-	    { model: Producto, attributes: ["id", "nombre"]},	
-            { model: Ramo, attributes: ["id", "nombre"]},
-            		
-       ],      
-      })
-        .then((polizas) =>
-          resolve({
-            paginas: Math.ceil(polizas.count / num),
-            pagina: page,
-            total: polizas.count,
-            data: polizas.rows,
-          })
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
+
   static search(nombres) {
     return new Promise((resolve, reject) => {
       let page = 1;
@@ -134,18 +135,8 @@ static getAll(pag,num) {
     });
   }	
 
-  static total(desde,hasta,usuarioId) { 
+  static total(desde,hasta) { 
     return new Promise((resolve, reject) => {
-	 let iuser = 0
-      let fuser = 30
-
-      if (usuarioId === '' || usuarioId === undefined || usuarioId === null || usuarioId === 0)
-         { console.log('pp') }
-      else{
-          iuser = usuarioId
-          fuser = usuarioId
-
-      }    
         Poliza.findOne({ 
           raw: true,
           nest: true,
@@ -154,7 +145,7 @@ static getAll(pag,num) {
            where: {
           [Op.and]: [
             { createdAt: { [Op.between]: [desde, hasta]}},
-            {usuarioId: {[Op.between]: [iuser, fuser]}}
+            /*{usuarioId: {[Op.between]: [iuser, fuser]}}*/
           ]
          },		
           })        
@@ -165,18 +156,29 @@ static getAll(pag,num) {
      });
   }
 
-  static totalDetalle(desde,hasta,usuarioId) {
+  static totalc(desde,hasta) { 
     return new Promise((resolve, reject) => {
-	    let iuser = 0
-      let fuser = 30
+        Poliza.findOne({ 
+          raw: true,
+          nest: true,
+          attributes: [[Sequelize.fn('count', Sequelize.col('primaTotal')), 'total']],
+          /* where: {[Op.and]: [{ createdAt: { [Op.between]: [desde, hasta]}}]},          */
+           where: {
+          [Op.and]: [
+            { createdAt: { [Op.between]: [desde, hasta]}},
+            /*{usuarioId: {[Op.between]: [iuser, fuser]}}*/
+          ]
+         },		
+          })        
+          .then((result) => { resolve(result) })
+            .catch((reason) => {
+                reject({ message: reason.message })
+              });
+     });
+  }
 
-      if (usuarioId === '' || usuarioId === undefined || usuarioId === null || usuarioId === 0)
-         { console.log('pp') }
-      else{
-          iuser = usuarioId
-          fuser = usuarioId
-
-      }
+  static totalDetalle(desde,hasta) {
+    return new Promise((resolve, reject) => {
        Poliza.findAndCountAll({
          raw: true,
          nest: true,         
@@ -188,7 +190,7 @@ static getAll(pag,num) {
 	 where: {
           [Op.and]: [
             { createdAt: { [Op.between]: [desde, hasta]}},
-            {usuarioId: {[Op.between]: [iuser, fuser]}}
+            /*{usuarioId: {[Op.between]: [iuser, fuser]}}*/
           ]
          },      
          order: [['ivigencia', 'DESC']],

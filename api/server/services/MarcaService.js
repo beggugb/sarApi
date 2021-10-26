@@ -8,82 +8,80 @@ const { Marca } = database;
 
 class MarcaService {
     
-   static add(newMarca) {    
-    return new Promise((resolve, reject) => {
-        if(newMarca.nombre)
-        {            
-            Marca.create(newMarca)
-            .then((marca) => {                
-                resolve({ message: "Marca registrado", marca: marca })
-            })
-            .catch((reason) => {                
-                reject({ message: reason.message, marca: null })
-              });
-            
-        }else{                
-             reject({ message: "Datos faltantes", Marca: null })
-        }        
-   });
-  } 
-  static update(dato, datoId) {
-    return new Promise((resolve, reject) => {
-      Marca.update(dato, { where: { id: Number(datoId) } })
-        .then((marca) => resolve(marca))
-        .catch((reason) => reject(reason));
-    });
-  }
-
-  static delete(datoId) {
-    return new Promise((resolve, reject) => {
-      Marca.destroy({ where: { id: Number(datoId) } })
-        .then((marca) => resolve(marca))
-        .catch((reason) => reject(reason));
-    });
-  }
-
-  static getItem(datoId) {
-    return new Promise((resolve, reject) => {
-      Marca.findByPk(datoId)
-        .then((marca) => resolve(marca))
-        .catch((reason) => reject(reason));
-    });
-  }
-
-  static lista() {  
-   return new Promise((resolve, reject) => {
-      Marca.findAll({
-	attributes: [["id","value"],["nombre","label"],"id","icon"],      
-        order: [['nombre','ASC']]
-      })
-        .then((Marcaes) =>
-          resolve(Marcaes)
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
- 
-static getAll(pag,num,prop,orden) {
-   return new Promise((resolve, reject) => {
+  static data(pag,num,prop,value){
+    return new Promise((resolve,reject) =>{
       let page = parseInt(pag);
       let der = num * page - num;
-      Marca.findAndCountAll({
-        raw: true,
-        nest: true,
-        offset: der,
-        limit: num,
-        order: [[prop, orden]]
-      })
-        .then((marcas) =>
-          resolve({
-            paginas: Math.ceil(marcas.count / num),
-            pagina: page,
-            total: marcas.count,
-            data: marcas.rows,
+        Marca.findAndCountAll({
+          raw: true,
+          nest: true,
+          offset: der,
+          limit: num,
+          order: [[prop,value]]
+        })
+        .then((rows) => resolve({
+          paginas: Math.ceil(rows.count / num),
+          pagina: page,
+          total: rows.count,
+          data: rows.rows
+        }))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+static list(prop,value){
+    return new Promise((resolve,reject) =>{
+        Marca.findAll({
+          raw: true,
+          nest: true,                
+          order: [[prop,value]],          
+          attributes: [["id","value"],["nombre","label"],"id","icon"],
           })
-        )
-        .catch((reason) => reject(reason));
-    });
-  }	
+        .then((row) => resolve(row))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+static item(id){
+    return new Promise((resolve,reject) =>{
+        Marca.findByPk(id,{
+          raw: true,
+          nest: true
+        })
+        .then((row)=> resolve( row ))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+static items(prop,value){
+    return new Promise((resolve,reject) =>{            
+        Marca.findAll({
+          raw: true,
+          nest: true,                
+          order: [[prop,value]]                         
+        })
+        .then((rows) => resolve(rows))
+        .catch((reason) => reject({ message: reason.message }))            
+    })
+}
+static update(value,id){
+    return new Promise((resolve,reject) =>{
+        Marca.update(value, { where: { id: Number(id) } })
+        .then((row)=> resolve( row ))
+        .catch((reason) => reject({ message: reason.message })) 
+    })
+}
+static delete(id){
+    return new Promise((resolve,reject) =>{
+        Marca.destroy({ where: { id: Number(id) } })
+        .then((cliente) => resolve(cliente))
+        .catch((reason)  => reject(reason));
+    })
+}
+static add(value){
+    return new Promise((resolve,reject) =>{
+        Marca.create(value)
+        .then((row) => resolve( row ))
+        .catch((reason)  => reject({ message: reason.message }))  
+    })
+}  
   
 }
 

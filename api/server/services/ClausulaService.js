@@ -42,7 +42,7 @@ class ClausulaService {
     });
   }
 
-  static getItem(datoId) {
+  static tem(datoId) {
     return new Promise((resolve, reject) => {
       Clausula.findByPk(datoId)
         .then((clausula) => resolve(clausula))
@@ -50,20 +50,20 @@ class ClausulaService {
     });
   }
 
-  static lista() {  
-   return new Promise((resolve, reject) => {
+  static list(prop,value){
+    return new Promise((resolve,reject) =>{
       Clausula.findAll({
-	attributes: [["id","valor"],"label"],      
-        order: [['label','ASC']]
-      })
-        .then((clausulaes) =>
-          resolve(clausulaes)
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
+          raw: true,
+          nest: true,                
+          order: [[prop,value]],
+          attributes:[[prop,'label'],['id','value']]  
+          })
+        .then((row) => resolve(row))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
  
-static getAll(pag,num,prop,orden) {
+static data(pag,num,prop,orden) {
    return new Promise((resolve, reject) => {
       let page = parseInt(pag);
       let der = num * page - num;

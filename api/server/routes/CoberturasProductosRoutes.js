@@ -2,11 +2,11 @@ import { Router } from 'express';
 import CoberturaProductosController from '../controllers/CoberturaProductosController';
 
 const router = Router();
-router.get('/listas/:page/:num/:prop/:orden',CoberturaProductosController.lista)
-router.get('/lista',CoberturaProductosController.listas)
-router.get('/:id',CoberturaProductosController.item)
-router.post('/', CoberturaProductosController.add);
-router.put('/:id', CoberturaProductosController.update);
-router.delete('/:id', CoberturaProductosController.delete);
+router.get('/data/:id',CoberturaProductosController.getData)
+router.get('/list/:prop/:value', CoberturaProductosController.getList);
+router.get('/:id',CoberturaProductosController.getItem)
+router.post('/:tipo', CoberturaProductosController.setAdd);
+router.put('/:id/:tipo', CoberturaProductosController.setUpdate);
+router.delete('/:id/:tipo', CoberturaProductosController.getDelete);
 
 export default router;

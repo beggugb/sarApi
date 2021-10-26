@@ -14,7 +14,7 @@ class MailController {
   static send(tipo, cotizacion) {    
     let fecha = new Date()
     return new Promise((resolve, reject) => {            
-      Promise.all([EmpresaService.getItem(1)])
+      Promise.all([EmpresaService.item(1)])
         .then(([empresa]) => {          
            Promise.all([enviar(tipo, empresa,cotizacion, fecha)]).then(([mail]) => {
             resolve(mail);        

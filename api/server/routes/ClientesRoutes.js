@@ -3,17 +3,23 @@ import { Router } from 'express';
 import ClienteController from '../controllers/ClienteController';
 
 const router = Router();
-router.post('/mobil/login/',ClienteController.loginmobil);
+/*mobil*/
+router.post('/mobil/login/',ClienteController.getLogin);
+router.get('/mobil/:id',ClienteController.getMobilItem);
+router.put('/mobil/:id/:tipo',ClienteController.setUpdateMobil);
 
-router.get('/listas/:page/:num/:prop/:orden',KeyTokens,ClienteController.lista)
-router.get('/:id',KeyTokens,ClienteController.item)
-router.post('/registro',KeyTokens,ClienteController.registro);
-router.post('/',KeyTokens,ClienteController.add);
-router.put('/:id',KeyTokens,ClienteController.update);
-router.delete('/:id',KeyTokens,ClienteController.delete);
-router.post('/search',KeyTokens,ClienteController.search);
-router.get('/listadetalle/:nombre',KeyTokens,ClienteController.buscar)
-router.put('/mobil/:id',KeyTokens,ClienteController.updates);
-router.get('/mobil/:id',KeyTokens,ClienteController.mitem);
+/*fijo*/
+router.get('/data/:page/:num/:prop/:orden',ClienteController.getData);
+router.get('/list/:prop/:value', ClienteController.getList);
+router.get('/items/:prop/:value', ClienteController.getItems);
+router.get('/:id',ClienteController.getItem);
+router.post('/:tipo',ClienteController.setAdd);
+router.put('/:id/:tipo',ClienteController.setUpdate);
+router.delete('/:id/:tipo',ClienteController.getDelete);
+router.post('/search/lista',ClienteController.getSearch);
+router.get('/listadetalle/:nombre',ClienteController.buscar)
+
+
+
 
 export default router;

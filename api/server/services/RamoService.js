@@ -8,82 +8,105 @@ const { Ramo } = database;
 
 class RamoService {
     
-   static add(newRamo) {    
-    return new Promise((resolve, reject) => {
-        if(newRamo.nombre)
-        {            
-            Ramo.create(newRamo)
-            .then((ramo) => {                
-                resolve({ message: "Ramo registrado", ramo: ramo })
-            })
-            .catch((reason) => {                
-                reject({ message: reason.message, ramo: null })
-              });
-            
-        }else{                
-             reject({ message: "Datos faltantes", Ramo: null })
-        }        
-   });
-  } 
-  static update(dato, datoId) {
-    return new Promise((resolve, reject) => {
-      Ramo.update(dato, { where: { id: Number(datoId) } })
-        .then((ramo) => resolve(ramo))
-        .catch((reason) => reject(reason));
-    });
-  }
-
-  static delete(datoId) {
-    return new Promise((resolve, reject) => {
-      Ramo.destroy({ where: { id: Number(datoId) } })
-        .then((ramo) => resolve(ramo))
-        .catch((reason) => reject(reason));
-    });
-  }
-
-  static getItem(datoId) {
-    return new Promise((resolve, reject) => {
-      Ramo.findByPk(datoId)
-        .then((ramo) => resolve(ramo))
-        .catch((reason) => reject(reason));
-    });
-  }
-
-  static lista() {  
-   return new Promise((resolve, reject) => {
-      Ramo.findAll({
-	attributes: [["id","value"],["nombre","label"],"id","icono"],      
-        order: [['nombre','ASC']]
-      })
-        .then((Ramoes) =>
-          resolve(Ramoes)
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
- 
-static getAll(pag,num,prop,orden) {
-   return new Promise((resolve, reject) => {
+  static data(pag,num,prop,value){
+    return new Promise((resolve,reject) =>{
       let page = parseInt(pag);
       let der = num * page - num;
-      Ramo.findAndCountAll({
-        raw: true,
-        nest: true,
-        offset: der,
-        limit: num,
-        order: [[prop, orden]]
-      })
-        .then((ramos) =>
-          resolve({
-            paginas: Math.ceil(ramos.count / num),
-            pagina: page,
-            total: ramos.count,
-            data: ramos.rows,
+        Ramo.findAndCountAll({
+          raw: true,
+          nest: true,
+          offset: der,
+          limit: num,
+          order: [[prop,value]],
+          attributes:["id","nombres","direccion","email"] 
+        })
+        .then((rows) => resolve({
+          paginas: Math.ceil(rows.count / num),
+          pagina: page,
+          total: rows.count,
+          data: rows.rows
+        }))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+static list(prop,value){
+    return new Promise((resolve,reject) =>{
+        Ramo.findAll({
+          raw: true,
+          nest: true,                
+          order: [[prop,value]],          
+          attributes: [[prop,"value"],["nombre","label"],"id","icono"],  
           })
-        )
-        .catch((reason) => reject(reason));
-    });
-  }	
+        .then((row) => resolve(row))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+static item(id){
+    return new Promise((resolve,reject) =>{
+        Ramo.findByPk(id,{
+          raw: true,
+          nest: true
+        })
+        .then((row)=> resolve( row ))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+static items(prop,value){
+    return new Promise((resolve,reject) =>{            
+        Ramo.findAll({
+          raw: true,
+          nest: true,                
+          order: [[prop,value]],
+          attributes:["id","nombres","direccion","email"]                               
+        })
+        .then((rows) => resolve(rows))
+        .catch((reason) => reject({ message: reason.message }))            
+    })
+}
+static update(value,id){
+    return new Promise((resolve,reject) =>{
+        Ramo.update(value, { where: { id: Number(id) } })
+        .then((row)=> resolve( row ))
+        .catch((reason) => reject({ message: reason.message })) 
+    })
+}
+static delete(id){
+    return new Promise((resolve,reject) =>{
+        Ramo.destroy({ where: { id: Number(id) } })
+        .then((cliente) => resolve(cliente))
+        .catch((reason)  => reject(reason));
+    })
+}
+static add(value){
+    return new Promise((resolve,reject) =>{
+        Ramo.create(value)
+        .then((row) => resolve( row ))
+        .catch((reason)  => reject({ message: reason.message }))  
+    })
+}  
+static search(prop,value){
+    return new Promise((resolve,reject) =>{            
+        let iValue = '%' + value + '%'
+        if (value === '--todos--' || value === null || value === '0') { iValue = '%' }            
+        Ramo.findAndCountAll({
+            raw: true,
+            nest: true,
+            offset: 0,
+            limit: 12,
+            where: { [prop]: { [Op.iLike]: iValue }},
+            order: [[prop,'ASC']],
+            attributes:["id","nombres","direccion","email"]  
+        })		
+        .then((rows) => resolve({
+            paginas: Math.ceil(rows.count / 12),
+            pagina: 1,
+            total: rows.count,
+            data: rows.rows
+        } 
+  ))
+    .catch((reason)  => reject({ message: reason.message })) 
+    })
+}  
   
 }
 

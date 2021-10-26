@@ -7,6 +7,30 @@ const Op = Sequelize.Op;
 const { Producto, Ramo } = database;
 
 class ProductoService {
+
+  static data(pag,num,prop,orden) {
+    return new Promise((resolve, reject) => {
+       let page = parseInt(pag);
+       let der = num * page - num;
+       Producto.findAndCountAll({
+         raw: true,
+         nest: true,
+         offset: der,
+         limit: num,
+         order: [[prop, orden]],
+         include: [{ model: Ramo, attributes: ["id", "nombre"]}]  
+       })
+         .then((productos) =>
+           resolve({
+             paginas: Math.ceil(productos.count / num),
+             pagina: page,
+             total: productos.count,
+             data: productos.rows,
+           })
+         )
+         .catch((reason) => reject(reason));
+     });
+   }
     
    static add(newProducto) {    
     return new Promise((resolve, reject) => {
@@ -63,42 +87,21 @@ class ProductoService {
     });
   }
 
-  static lista() {  
-   return new Promise((resolve, reject) => {
-      Producto.findAll({
-	attributes: [["id","value"],["nombre","label"]],      
-        order: [['nombre','ASC']]
-      })
-        .then((productoes) =>
-          resolve(productoes)
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
- 
-static getAll(pag,num,prop,orden) {
-   return new Promise((resolve, reject) => {
-      let page = parseInt(pag);
-      let der = num * page - num;
-      Producto.findAndCountAll({
-        raw: true,
-        nest: true,
-        offset: der,
-        limit: num,
-        order: [[prop, orden]],
-        include: [{ model: Ramo, attributes: ["id", "nombre"]}]  
-      })
-        .then((productos) =>
-          resolve({
-            paginas: Math.ceil(productos.count / num),
-            pagina: page,
-            total: productos.count,
-            data: productos.rows,
+  
+  static list(prop,value){
+    return new Promise((resolve,reject) =>{
+        Producto.findAll({
+          raw: true,
+          nest: true,                
+          order: [[prop,value]],
+          attributes: [["id","value"],["nombre","label"]],  
           })
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
+        .then((row) => resolve(row))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
+ 
+
 
 static getAllRamos(ramoId) {
    return new Promise((resolve, reject) => {
@@ -116,7 +119,7 @@ static getAllRamos(ramoId) {
     });
   } 
 
-static getAllRamo(ramoId) {
+static detalle(ramoId) {
    return new Promise((resolve, reject) => {
       Producto.findAll({
         raw: true,

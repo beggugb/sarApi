@@ -8,24 +8,22 @@ const { CoberturaProducto, Cobertura } = database;
 
 class CoberturaProductosService {
     
-/*   static add(newCoberturaProductos) {    
+  static data(productoId) {
     return new Promise((resolve, reject) => {
-        if(newCoberturaProductos.label)
-        {            
-            CoberturaProducto.create(newCoberturaProductos)
-            .then((result) => {                
-                resolve({ message: "CoberturaProductos registrado", result: result })
-            })
-            .catch((reason) => {                
-                reject({ message: reason.message, result: null })
-              });
-            
-        }else{                
-             reject({ message: "Datos faltantes", result: null })
-        }        
-   });
-  } 
-*/
+     CoberturaProducto.findAll({
+         raw: true,
+         nest: true,
+         order: [['id','ASC']],
+         where: { productoId: productoId },
+         attributes: ["id", "label","key","productocompaniaId","coberturaId","productoId"]     
+       })
+         .then((productos) =>
+           resolve(productos)
+         )
+         .catch((reason) => reject(reason));
+     });
+   }
+
   static add(data) {
     return new Promise((resolve, reject) => {
         CoberturaProducto.bulkCreate(data, {individualHooks: true})

@@ -1,29 +1,42 @@
 import EmpresaService from "../services/EmpresaService";
 
 class EmpresaController {
- 
 
-  static item(req, res) {                  
-      Promise.all([EmpresaService.getItem(req.params.id)]) 
-           .then(([empresa]) => {
-                res.status(200).send({ result: empresa });                
-            })        
-        .catch((reason) => {                         
-          res.status(400).send({ reason });
-        });   
+  static getItem(req, res) {    
+    EmpresaService.item(req.params.id)
+      .then((row) => {                      
+        res.status(200).send({result: row });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
   }
-
-  static update(req, res) {
-    Promise.all([EmpresaService.update(req.body, req.params.id)])
-      .then(([result]) => {
-        Promise.all([EmpresaService.getItem(req.params.id)])
-            .then(([empresa]) => {
-              res.status(200).send({ message:'Empresa actualizada', result: empresa });
-        })
-      })  
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message, empresa: null });
-      });
+ 
+  static setUpdate(req, res) {       
+    if(req.params.tipo === 'lista')
+    {
+      EmpresaService.update(req.body,req.params.id)
+        .then((row) => {
+           EmpresaService.data(1,12,'nombres','ASC')
+             .then((rows) => {               
+                res.status(200).send({result: rows });                        
+             })
+        })                        
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+        });
+    } else{
+      EmpresaService.update(req.body,req.params.id)
+        .then((row) => {                      
+            EmpresaService.item(req.params.id)
+                .then((row) => {                      
+                  res.status(200).send({result: row });                        
+            })                     
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+        });
+    }  
   }
   
 }

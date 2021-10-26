@@ -1,16 +1,12 @@
 import { Router } from 'express';
 import AgenteController from '../controllers/AgenteController';
-import WhatsAppController from '../controllers/WhatsAppController'
 const router = Router();
-router.get('/listas/:page/:num/:prop/:orden',AgenteController.lista)
-router.post('/registro', AgenteController.add);
-router.put('/:id', AgenteController.update);
-router.post('/search',AgenteController.search)
-router.get('/formula/item/:rango/:potencia',AgenteController.formula)
-/*router.get('/:id',ClienteController.item)
-router.post('/registro', ClienteController.registro);
-router.post('/', ClienteController.add);
-router.put('/:id', ClienteController.update);
-router.delete('/:id', ClienteController.delete);
-router.post('/search',ClienteController.search);*/
+router.get('/data/:page/:num/:prop/:orden',AgenteController.getData);
+router.get('/list/:prop/:value', AgenteController.getList);
+router.get('/items/:prop/:value', AgenteController.getItems);
+router.get('/:id',AgenteController.getItem);
+router.post('/:tipo',AgenteController.setAdd);
+router.put('/:id/:tipo',AgenteController.setUpdate);
+router.delete('/:id/:tipo',AgenteController.getDelete);
+router.post('/search/lista',AgenteController.getSearch);
 export default router;

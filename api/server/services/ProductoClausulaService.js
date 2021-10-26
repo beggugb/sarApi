@@ -7,6 +7,23 @@ const Op = Sequelize.Op;
 const { ProductoClausula, Clausula, ClausulaProducto } = database;
 
 class ProductoClausulaService {
+
+  static data(productoId) {
+    return new Promise((resolve, reject) => {
+       ProductoClausula.findAll({
+         raw: true,
+         nest: true,
+         where: { productoId: productoId},
+         order: [['id', 'ASC']],
+          attributes: ["id", "label","productoId","clausulaId"]      
+        })
+         .then((productos) =>
+           resolve(productos)
+         )
+         .catch((reason) => reject(reason));
+     });
+   } 
+
     
    static add(data) {    
     return new Promise((resolve, reject) => {
@@ -76,21 +93,7 @@ static getAll(productoId) {
     });
   }
 
-static getAllProducto(productoId) {
-   return new Promise((resolve, reject) => {
-      ProductoClausula.findAll({
-        raw: true,
-        nest: true,
-        where: { productoId: productoId},
-        order: [['id', 'ASC']],
-	attributes: ["id", "label","productoId","clausulaId"]      
-      })
-        .then((productos) =>
-          resolve(productos)
-        )
-        .catch((reason) => reject(reason));
-    });
-  } 	
+	
   
 }
 

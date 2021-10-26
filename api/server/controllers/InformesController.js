@@ -11,6 +11,26 @@ import moment from 'moment'
 
 class InformesController {
 
+  static dashboard(req, res) {    
+    var dDesde = new Date()
+    var dHasta = new Date()
+    var fdesde = dDesde.getFullYear()+'-01-01'
+    var fhasta = (new Date(dHasta + 'UTC')).toISOString().replace(/-/g, '-').split('T')[0]
+
+    Promise.all([
+      CotizacionService.total(fdesde, fhasta),CotizacionService.totalc(fdesde, fhasta),
+      PolizaService.total(fdesde, fhasta),PolizaService.totalc(fdesde, fhasta),
+      ClienteService.total(fdesde, fhasta),
+    ])
+      .then(([sumCot,countCot,sumPol,countPol,countCli]) => {
+        res.status(200).send({ result:{ 'sumCot':sumCot.total,'countCot':countCot.total,'sumPol':sumPol.total,'countPol':countPol.total,'countCli':countCli.total }});
+      })
+      .catch((reason) => {
+        console.log(reason)      
+      res.status(400).send({ message: reason });
+    });
+  }
+
   static clientes(req, res) {    
     const { desde, hasta } = req.body;       
     Promise.all([ClienteService.reporte(desde, hasta)])
@@ -23,9 +43,8 @@ class InformesController {
       });    
   }
   static cotizaciones(req, res) {    
-      const { desde, hasta, usuarioId } = req.body;
-      console.log(usuarioId)	  
-      Promise.all([CotizacionService.total(desde,hasta,usuarioId),CotizacionService.totalDetalle(desde,hasta,usuarioId)])
+      const { desde, hasta } = req.body;
+      Promise.all([CotizacionService.total(desde,hasta),CotizacionService.totalDetalle(desde,hasta)])
         .then(([dat,datas]) => {
           res.status(200).send({ result: { detalle: dat.total, data: datas} });
         })
@@ -34,8 +53,8 @@ class InformesController {
       });    
   }
   static polizas(req, res) {    
-    const { desde, hasta, usuarioId } = req.body;
-    Promise.all([PolizaService.total(desde,hasta,usuarioId),PolizaService.totalDetalle(desde,hasta,usuarioId)])
+    const { desde, hasta } = req.body;
+    Promise.all([PolizaService.total(desde,hasta),PolizaService.totalDetalle(desde,hasta)])
       .then(([dat,datas]) => {
         res.status(200).send({ result: { detalle: dat.total, data: datas} });
       })

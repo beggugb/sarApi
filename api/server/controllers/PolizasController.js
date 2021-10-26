@@ -8,8 +8,17 @@ import PCoberturaService from "../services/PCoberturaService"
 import PClausulaService from "../services/PClausulaService"
 import NotaCobranzaService from "../services/NotaCobranzaService"
 import PlanPagoService from "../services/PlanPagoService"
+import AutoService from "../services/AutoService"
 import fFecha from "../utils/fFecha"
 class PolizasController { 
+
+  static getData(req, res) {
+    PolizaService.data(req.params.page,req.params.num,req.params.prop,req.params.orden)
+      .then((result) => { res.status(200).send({ result: result });})
+      .catch((reason) => {
+        res.status(400).send({ reason });
+      });
+}
 
    static search(req, res) {
     const { nombres } = req.body
@@ -24,24 +33,19 @@ class PolizasController {
   }
 	
 
-   static lista(req, res) {
-      Promise.all([PolizaService.getAll(req.params.page,req.params.num)])
-        .then(([result]) => { res.status(200).send({ result: result });})
-        .catch((reason) => {
-          res.status(400).send({ reason });
-        });
-  }
-   static item(req, res) {
+  
+   static getItem(req, res) {
       Promise.all([
 	      PolizaService.getItem(req.params.id),
 	      PCoberturaService.getAllPoliza(req.params.id),
 	      PClausulaService.getAllPoliza(req.params.id),
-	      NotaCobranzaService.getAllPoliza(req.params.id)
+	      NotaCobranzaService.getAllPoliza(req.params.id),        
       ])
       .then(([polizas,coberturas,clausulas,nota]) => {
-          Promise.all([PlanPagoService.getAllNota(nota.id)])
-           .then(([pagos]) => {
-                res.status(200).send({ result: {polizas,coberturas,clausulas,nota,pagos }});
+        console.log(nota.id)
+        Promise.all([PlanPagoService.getAllNota(nota.id),AutoService.getItem(polizas.cotizacionId)])
+           .then(([pagos,auto]) => {
+                res.status(200).send({ result: {polizas,coberturas,clausulas,nota,pagos,auto }});
             })
 	  })    
         .catch((reason) => {
@@ -51,10 +55,10 @@ class PolizasController {
   }
 	
 
- static registro(req, res) {   	 
-    const {productoId,companiaId, primaTotal, contado, cotizacionId, rolId, usuarioId } = req.body	 
-     Promise.all([PolizaService.add(req.body)]) 
-      .then(([resPoliza]) => { 
+ static setAdd(req, res) {   	 
+    const {productoId, companiaId, primaTotal, contado, cotizacionId, rolId, usuarioId } = req.body	 
+     PolizaService.add(req.body) 
+      .then((resPoliza) => { 
 	        Promise.all([ProductoCompaniaService.getCompaniaId(productoId,companiaId),ProductoService.getItemContrato(productoId)])     
 	          .then(([resCompania, resProducto]) => {		  
 	              Promise.all([CoberturaProductosService.getAllCProducto(resCompania.id),ClausulaProductosService.getAllCProducto(resCompania.id)])
@@ -86,7 +90,7 @@ class PolizasController {
  
 		                  let fecha = new Date()	
 		                  let nota = {}
-		                  nota.nro =  poliza.id
+		                  nota.nro =  resPoliza.id
                       nota.num = contado ? 1 : 5
                       nota.primaTotal = primaTotal
                       nota.primaSaldo = primaTotal
@@ -96,7 +100,7 @@ class PolizasController {
                       nota.comisionPagada = 0
                       nota.ivigencia= fecha 
                       nota.fvigencia= fecha 
-                      nota.polizaId= poliza.id 		
+                      nota.polizaId= resPoliza.id		
              	        Promise.all([PCoberturaService.add(ncoberturas),PClausulaService.add(nclausulas),NotaCobranzaService.add(nota)])
                         .then(([resCo,resCa,resNota]) => {
 		                        let nronota = contado ? 1 : 5	
@@ -118,11 +122,10 @@ class PolizasController {
 	                          newCotizacion.id = cotizacionId		
 	                          newCotizacion.contratado = true		
 		                        Promise.all([PlanPagoService.add(pagos),CotizacionService.update(newCotizacion,cotizacionId)])
-		                            .then(([resPagos,resCoti]) => {
-	                                  Promise.all([CotizacionService.getAll(usuarioId,rolId,1,12)])
-                                        .then(([resCotizacionesAll]) => {		      
+		                            .then(([resPagos,resCoti]) => {	                                  
+                                      CotizacionService.data(1,12,'id','desc')                                      
+                                        .then((resCotizacionesAll) => {		      
 			                                        res.status(200).send({ result: resCotizacionesAll });
-		  	
                                         })
                                 })			    
 	                      })		

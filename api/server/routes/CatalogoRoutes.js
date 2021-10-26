@@ -2,7 +2,7 @@ import { Router } from 'express';
 import CatalogoController from '../controllers/CatalogoController';
 
 const router = Router();
-router.post('/', CatalogoController.add);
-router.get('/:id',CatalogoController.item)
-router.put('/:id',CatalogoController.update)
+router.get('/:id',CatalogoController.getItem);
+router.post('/:tipo', CatalogoController.setAdd);
+router.put('/:id/:tipo',CatalogoController.setUpdate);
 export default router;

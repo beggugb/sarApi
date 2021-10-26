@@ -50,19 +50,18 @@ class CoberturaService {
     });
   }
 
-  static lista() {  
-   return new Promise((resolve, reject) => {
+  static list(prop,value){
+    return new Promise((resolve,reject) =>{
       Cobertura.findAll({
-	attributes: [["id","valor"],"label"],      
-        order: [['label','ASC']]
-      })
-        .then((coberturaes) =>
-          resolve(coberturaes)
-        )
-        .catch((reason) => reject(reason));
-    });
-  }
-
+          raw: true,
+          nest: true,                
+          order: [[prop,value]],
+          attributes:[[prop,'label'],['id','value']]  
+          })
+        .then((row) => resolve(row))
+        .catch((reason) => reject({ message: reason.message }))
+    })
+}
  
 static getAll(pag,num,prop,orden) {
    return new Promise((resolve, reject) => {

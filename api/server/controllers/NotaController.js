@@ -3,7 +3,28 @@ import PlanPagoService from "../services/PlanPagoService";
 import ComisionService from "../services/ComisionService";
 
 class NotaController {
-    static add(req, res) { 
+
+  static getData(req, res) {        
+    NotaService.data(req.params.page,req.params.num,req.params.prop,req.params.orden)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              	
+        res.status(400).send({ message: reason });
+      });
+  }
+
+  static getDataMoras(req, res) {         
+    var fcaja = (new Date(dd + 'UTC')).toISOString().replace(/-/g, '-').split('T')[0]    
+    NotaService.data(req.params.page,req.params.num,req.params.prop,req.params.orden)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              	
+        res.status(400).send({ message: reason });
+      });
+  }
+  static setAdd(req, res) { 
     const { notaId, id, pmonto, pcomision, usuarioId }  = req.body  
     let pdato = {
         id : id,

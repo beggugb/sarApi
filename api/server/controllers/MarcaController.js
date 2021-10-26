@@ -2,80 +2,138 @@ import MarcaService from "../services/MarcaService";
 
 class MarcaController {
  
+  static getData(req, res) {        
+    MarcaService.data(req.params.page,req.params.num,req.params.prop,req.params.orden)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              	
+        res.status(400).send({ message: reason });
+      });
+  }
 
-  static item(req, res) {                  
-      Promise.all([MarcaService.getItem(req.params.id)]) 
-           .then(([marca]) => {
-                res.status(200).send({ result: marca });                
-            })        
-        .catch((reason) => {                  
-          res.status(400).send({ reason });
-        });   
+  static getItem(req, res) {    
+    MarcaService.item(req.params.id)
+      .then((row) => {                      
+        res.status(200).send({result: row });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
+  static setAdd(req, res) {   
+    const { nombres } = req.body 
+    if(nombres){
+    if(req.params.tipo === 'lista')
+    {
+      MarcaService.add(req.body)
+        .then((row) => {                      
+          MarcaService.data(1,12,'nombre','ASC')
+            .then((rows) => {               
+              res.status(200).send({result: rows });                        
+            })
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+      });
+    }else{
+      MarcaService.add(req.body)
+        .then((row) => {                      
+          res.status(200).send({result: row });                        
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+      });
+    }  
+   }else{
+    res.status(400).send({ message: "datos faltantes" });
+   }
   }
   
-  static lista(req, res) {        
-      Promise.all([MarcaService.getAll(req.params.page,req.params.num,req.params.prop,req.params.orden)]) 
-        .then(([result]) => {
-             res.status(200).send({ result: result });                
-            })        
-        .catch((reason) => {          
-          res.status(400).send({ reason });
-        });   
-  }
-  static listas(req, res) { 
-	  console.log('dddd')
-      Promise.all([MarcaService.lista()])
-        .then(([result]) => {
-             res.status(200).send({ result: result });
-            })
-        .catch((reason) => {
-          res.status(400).send({ reason });
+  static setUpdate(req, res) {       
+    if(req.params.tipo === 'lista')
+    {
+      MarcaService.update(req.body,req.params.id)
+        .then((row) => {
+           MarcaService.data(1,12,'nombre','ASC')
+             .then((rows) => {               
+                res.status(200).send({result: rows });                        
+             })
+        })                        
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
         });
+    } else{
+      MarcaService.update(req.body,req.params.id)
+        .then((row) => {                      
+            MarcaService.item(req.params.id)
+                .then((row) => {                      
+                  res.status(200).send({result: row });                        
+            })                     
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+        });
+    }  
   }
 
-
-  static add(req, res) {        
-    Promise.all([MarcaService.add(req.body)])
-      .then(([result]) => {            
-          Promise.all([                    
-                  MarcaService.getAll(1,12,"nombre","ASC")
-              ]) 
-              .then(([result]) => {
-                  res.status(200).send({ message: 'Marca registrada',result: result });
-              })
-          })        
-      .catch((reason) => {          
-       res.status(400).send({ message: reason.message });
-      });   
-}
-
-static update(req, res) {
-    Promise.all([MarcaService.update(req.body, req.params.id)])
-      .then(([marca]) => {
-        Promise.all([ MarcaService.getAll(1,12,"nombre","ASC")]) 
-          .then(([marcaes]) => {
-              res.status(200).send({ message:'Marca actualizada', result: marcaes });
-          })
-        })    
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message, Marca: null });
-      });
-  }
-
-  static delete(req, res) {
-    Promise.all([MarcaService.delete(req.params.id)])
-      .then(([marca]) => {
-        Promise.all([                    
-          MarcaService.getAll(1,12,"nombre","ASC")]) 
-            .then(([result]) => {
-                res.status(200).send({ message:'Marca eliminada', result: result });
+  static getDelete(req, res) {    
+    if(req.params.tipo === 'lista')
+    {
+      MarcaService.delete(req.params.id)
+        .then((row) => {                      
+          MarcaService.data(1,12,'nombre','ASC')
+            .then((rows) => {               
+              res.status(200).send({result: rows });                        
             })
-        })
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message, data: null });
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
       });
+    }else{
+      MarcaService.delete(req.params.id)
+        .then((row) => {                      
+          res.status(200).send({result: row });                        
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+      });
+    }  
   }
+
+ 
+
+  static getSearch(req, res) {    
+    const {prop, value} = req.body    
+    MarcaService.search(prop, value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
+  static getList(req, res) {    
+    MarcaService.list(req.params.prop,req.params.value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
+
   
+
+  static getItems(req, res) {    
+    MarcaService.items(req.params.prop,req.params.value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
 }
 
 

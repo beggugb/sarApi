@@ -30,6 +30,8 @@ import ubicacionRoutes from './UbicacionesRoutes'
 import propagandaRoutes from './PropagandasRoutes'
 import mensajeRoutes from './MensajesRoutes'
 import pushRoutes from './PushRoutes'
+import planRoutes from './PlanPagoRoutes'
+import ticketRoutes from './TicketsRoutes'
 
 import siniestrosRoutes from './SiniestrosRoutes'
 export default (app) => {
@@ -65,4 +67,6 @@ export default (app) => {
         app.use('/api/mensajes',mensajeRoutes);
         app.use('/api/push',pushRoutes);
         app.use('/api/siniestros',siniestrosRoutes);
+        app.use('/api/pagos',planRoutes);
+        app.use('/api/tickets',ticketRoutes);
 }

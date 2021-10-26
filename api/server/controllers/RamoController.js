@@ -1,79 +1,138 @@
 import RamoService from "../services/RamoService";
 
 class RamoController {
- 
 
-  static item(req, res) {                  
-      Promise.all([RamoService.getItem(req.params.id)]) 
-           .then(([ramo]) => {
-                res.status(200).send({ result: ramo });                
-            })        
-        .catch((reason) => {                  
-          res.status(400).send({ reason });
-        });   
+  static getData(req, res) {        
+    RamoService.data(req.params.page,req.params.num,req.params.prop,req.params.orden)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              	
+        res.status(400).send({ message: reason });
+      });
+  }
+
+  static getItem(req, res) {    
+    RamoService.item(req.params.id)
+      .then((row) => {                      
+        res.status(200).send({result: row });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
+  static setAdd(req, res) {   
+    const { nombres } = req.body 
+    if(nombres){
+    if(req.params.tipo === 'lista')
+    {
+      RamoService.add(req.body)
+        .then((row) => {                      
+          RamoService.data(1,12,'nombre','ASC')
+            .then((rows) => {               
+              res.status(200).send({result: rows });                        
+            })
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+      });
+    }else{
+      RamoService.add(req.body)
+        .then((row) => {                      
+          res.status(200).send({result: row });                        
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+      });
+    }  
+   }else{
+    res.status(400).send({ message: "datos faltantes" });
+   }
   }
   
-  static lista(req, res) {        
-      Promise.all([RamoService.getAll(req.params.page,req.params.num,req.params.prop,req.params.orden)]) 
-        .then(([result]) => {
-             res.status(200).send({ result: result });                
-            })        
-        .catch((reason) => {          
-          res.status(400).send({ reason });
-        });   
-  }
-  static listas(req, res) { 
-	  console.log('dddd')
-      Promise.all([RamoService.lista()])
-        .then(([result]) => {
-             res.status(200).send({ result: result });
-            })
-        .catch((reason) => {
-          res.status(400).send({ reason });
+  static setUpdate(req, res) {       
+    if(req.params.tipo === 'lista')
+    {
+      RamoService.update(req.body,req.params.id)
+        .then((row) => {
+           RamoService.data(1,12,'nombre','ASC')
+             .then((rows) => {               
+                res.status(200).send({result: rows });                        
+             })
+        })                        
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
         });
+    } else{
+      RamoService.update(req.body,req.params.id)
+        .then((row) => {                      
+            RamoService.item(req.params.id)
+                .then((row) => {                      
+                  res.status(200).send({result: row });                        
+            })                     
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+        });
+    }  
   }
 
-
-  static add(req, res) {        
-    Promise.all([RamoService.add(req.body)])
-      .then(([result]) => {            
-          Promise.all([                    
-                  RamoService.getAll(1,12,"nombre","ASC")
-              ]) 
-              .then(([result]) => {
-                  res.status(200).send({ message: 'Ramo registrada',result: result });
-              })
-          })        
-      .catch((reason) => {          
-       res.status(400).send({ message: reason.message });
-      });   
-}
-
-static update(req, res) {
-    Promise.all([RamoService.update(req.body, req.params.id)])
-      .then(([ramo]) => {
-        Promise.all([ RamoService.getAll(1,12,"nombre","ASC")]) 
-          .then(([ramoes]) => {
-              res.status(200).send({ message:'Ramo actualizada', result: ramoes });
-          })
-        })    
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message, Ramo: null });
-      });
-  }
-
-  static delete(req, res) {
-    Promise.all([RamoService.delete(req.params.id)])
-      .then(([ramo]) => {
-        Promise.all([                    
-          RamoService.getAll(1,12,"nombre","ASC")]) 
-            .then(([result]) => {
-                res.status(200).send({ message:'Ramo eliminada', result: result });
+  static getDelete(req, res) {    
+    if(req.params.tipo === 'lista')
+    {
+      RamoService.delete(req.params.id)
+        .then((row) => {                      
+          RamoService.data(1,12,'nombre','ASC')
+            .then((rows) => {               
+              res.status(200).send({result: rows });                        
             })
-        })
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message, data: null });
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
       });
+    }else{
+      RamoService.delete(req.params.id)
+        .then((row) => {                      
+          res.status(200).send({result: row });                        
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+      });
+    }  
+  }
+
+ 
+
+  static getSearch(req, res) {    
+    const {prop, value} = req.body    
+    RamoService.search(prop, value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
+  static getList(req, res) {    
+    RamoService.list(req.params.prop,req.params.value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
+
+  
+
+  static getItems(req, res) {    
+    RamoService.items(req.params.prop,req.params.value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
   }
   
 }

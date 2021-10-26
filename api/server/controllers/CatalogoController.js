@@ -1,40 +1,11 @@
-import ProductoCompaniaService from "../services/ProductoCompaniaService";
-import TasaService from "../services/TasaService";
-import CotizacionService from "../services/CotizacionService";
-
 import ClausulaProductosService from "../services/ClausulaProductosService";
 import ProductoClausulaService from "../services/ProductoClausulaService"
 import ProductoCoberturaService from "../services/ProductoCoberturaService"
 import CoberturaProductosService from "../services/CoberturaProductosService"
 
-class CatalogoController {
+class CatalogoController {  
 
-  static add(req, res) {
-    const {productoId,lpcoberturas,lcoberturasp,lpclausulas,lclausulasp} = req.body
-      Promise.all([ 
-         ProductoClausulaService.delete(productoId),
-         ClausulaProductosService.delete(productoId),
-         ProductoCoberturaService.delete(productoId),
-         CoberturaProductosService.delete(productoId)
-      ])
-      .then(([result]) => {
-	Promise.all([
-            ProductoClausulaService.add(lpclausulas),		
-	    ClausulaProductosService.add(lclausulasp),	    
-	    ProductoCoberturaService.add(lpcoberturas),
-	    CoberturaProductosService.add(lcoberturasp)
-    	])	  
-        .then(([rest]) => {
-          res.status(200).send({ data: rest });
-        })		
-      })
-      .catch((reason) => {
-        console.log(reason)      
-       res.status(400).send({ message: reason.message });
-      });
-   }
-
-   static update(req, res) {
+  static setUpdate(req, res) {
     const {lpcoberturas,lcoberturasp,lpclausulas,lclausulasp} = req.body
     Promise.all([
             ProductoClausulaService.update(lpclausulas),
@@ -49,19 +20,42 @@ class CatalogoController {
         console.log(reason)
        res.status(400).send({ message: reason.message });
       });
-   }	
+   }
 
-  	
+  static setAdd(req, res) {
+    const {productoId,lpcoberturas,lcoberturasp,lpclausulas,lclausulasp} = req.body
+      Promise.all([ 
+         ProductoClausulaService.delete(productoId),
+         ClausulaProductosService.delete(productoId),
+         ProductoCoberturaService.delete(productoId),
+         CoberturaProductosService.delete(productoId)
+      ])
+      .then(([result]) => {
+	Promise.all([
+            ProductoClausulaService.add(lpclausulas),		
+	          ClausulaProductosService.add(lclausulasp),	    
+	          ProductoCoberturaService.add(lpcoberturas),
+	          CoberturaProductosService.add(lcoberturasp)
+    	  ])	  
+        .then(([rest]) => {
+          res.status(200).send({ data: rest });
+        })		
+      })
+      .catch((reason) => {
+        console.log(reason)      
+       res.status(400).send({ message: reason.message });
+      });
+   }
   
-  static item(req, res) {
+  static getItem(req, res) {
     Promise.all([
-            ProductoCoberturaService.getAllProducto(req.params.id),
-            CoberturaProductosService.getAllProducto(req.params.id),
-	    ProductoClausulaService.getAllProducto(req.params.id),
-            ClausulaProductosService.getAllProducto(req.params.id)
+      ProductoCoberturaService.data(req.params.id),
+      CoberturaProductosService.data(req.params.id),
+	    ProductoClausulaService.data(req.params.id),
+      ClausulaProductosService.data(req.params.id)
     ])
-        .then(([pcob,cobp,pcla,clap]) => {
-          res.status(200).send({ result: { pcob,cobp, pcla, clap }});
+      .then(([xpcoberturas, xcoberturasp, zpclausulas, zclausulasp]) => {
+          res.status(200).send({ result: { xpcoberturas, xcoberturasp, zpclausulas, zclausulasp }});
       })
       .catch((reason) => {
               console.log(reason)

@@ -2,84 +2,117 @@ import CoberturaProductosService from "../services/CoberturaProductosService";
 
 class CoberturaProductosController {
  
+  static getList(req, res) {    
+    CoberturaProductosService.list(req.params.prop,req.params.value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
 
-  static item(req, res) {                  
-      Promise.all([CoberturaProductosService.getItem(req.params.id)]) 
-           .then(([result]) => {
-                res.status(200).send({ result: result });                
-            })        
-        .catch((reason) => {                  
-          res.status(400).send({ reason });
-        });   
+  static getData(req, res) {        
+    CoberturaProductosService.data(req.params.id)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              	
+        res.status(400).send({ message: reason });
+      });
+  }
+
+  static getItem(req, res) {    
+    CoberturaProductosService.item(req.params.id)
+      .then((row) => {                      
+        res.status(200).send({result: row });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
+  static setAdd(req, res) {    
+    const { items, productoId} = req.body   
+    if(req.params.tipo === 'lista')
+    {
+      CoberturaProductosService.add(items)
+          .then((result) => {                    
+            CoberturaProductosService.data(productoId)
+                .then((xclausulasp) => {
+                    res.status(200).send({result: xclausulasp });                        
+                })
+          })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+      });
+    }   
   }
   
-  static lista(req, res) {        
-      Promise.all([CoberturaProductosService.getAll(req.params.page,req.params.num,req.params.prop,req.params.orden)]) 
-        .then(([result]) => {
-             res.status(200).send({ result: result });                
-            })        
-        .catch((reason) => {          
-          res.status(400).send({ reason });
-        });   
-  }
-  static listas(req, res) { 
-      Promise.all([CoberturaProductosService.lista()])
-        .then(([result]) => {
-             res.status(200).send({ result: result });
+  static setUpdate(req, res) {    
+    const { items, productoId } = req.body          
+    if(req.params.tipo === 'lista')
+    {        
+          CoberturaProductosService.update(items)
+            .then((result) => {
+                CoberturaProductosService.data(req.params.id)
+                .then((resu) => {
+                    res.status(200).send({ message:'ClausulaProductos actualizada', result: resu });
+                })
+              })       
+            .catch((reason) => {
+              res.status(400).send({ message: reason.message, result: null });
+            });
+    }
+  }    
+
+  static getDelete(req, res) {    
+    if(req.params.tipo === 'lista')
+    {
+      CoberturaProductosService.delete(req.params.id)
+        .then((row) => {                      
+          CoberturaProductosService.data(1,12,'nombres','ASC')
+            .then((rows) => {               
+              res.status(200).send({result: rows });                        
             })
-        .catch((reason) => {
-          res.status(400).send({ reason });
-        });
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+      });
+    }else{
+      CoberturaProductosService.delete(req.params.id)
+        .then((row) => {                      
+          res.status(200).send({result: row });                        
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason });
+      });
+    }  
   }
 
+ 
 
-  static add(req, res) {        
-    const {productoId} = req.body
-    Promise.all([CoberturaProductosService.add(req.body)])
-      .then(([result]) => {            
-          Promise.all([                    
-                  CoberturaProductosService.getAll(productoId,"label","ASC")
-              ]) 
-              .then(([result]) => {
-                  res.status(200).send({ message: 'CoberturaProductos registrada',result: result });
-              })
-          })        
-      .catch((reason) => {          
-       res.status(400).send({ message: reason.message });
-      });   
-}
-
-static update(req, res) {
-  Promise.all([CoberturaProductosService.getItem(req.params.id)])
-  .then(([cober]) => {
-    Promise.all([CoberturaProductosService.update(req.body, req.params.id)])
-      .then(([result]) => {
-        Promise.all([CoberturaProductosService.getAll(cober.productoId,"label","ASC")])
-          .then(([resu]) => {
-              res.status(200).send({ message:'CoberturaProductos actualizada', result: resu });
-          })
-        })
-      })        
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message, result: null });
-      });
+  static getSearch(req, res) {    
+    const {prop, value} = req.body    
+    CoberturaProductosService.search(prop, value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
   }
+  
 
-  static delete(req, res) {
-    Promise.all([CoberturaProductosService.getItem(req.params.id)])
-    .then(([cober]) => {
-        console.log(cober.productoId)    
-      Promise.all([CoberturaProductosService.delete(req.params.id)])
-      .then(([CoberturaProductos]) => {
-        Promise.all([CoberturaProductosService.getAll(cober.productoId,"label","ASC")])
-            .then(([result]) => {
-                res.status(200).send({ message:'CoberturaProductos eliminada', result: result });
-            })
-        })
-      })              
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message, data: null });
-      });
+  
+
+  static getItems(req, res) {    
+    CoberturaProductosService.items(req.params.prop,req.params.value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
   }
   
 }

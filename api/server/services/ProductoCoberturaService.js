@@ -7,6 +7,22 @@ const Op = Sequelize.Op;
 const { ProductoCobertura, Cobertura, CoberturaProducto } = database;
 
 class ProductoCoberturaService {
+
+  static data(productoId) {
+    return new Promise((resolve, reject) => {
+       ProductoCobertura.findAll({
+         raw: true,
+         nest: true,        
+         where: { productoId: productoId},
+         order: [['id', 'ASC']],
+         attributes: ["id", "label","productoId","coberturaId"]               
+       })
+         .then((productos) =>
+           resolve(productos)
+         )
+         .catch((reason) => reject(reason));
+     });
+   }
     
    static add(data) {    
      return new Promise((resolve, reject) => {
@@ -76,22 +92,10 @@ static getAll(productoId) {
     });
   }
 
-static getAllProducto(productoId) {
-   return new Promise((resolve, reject) => {
-      ProductoCobertura.findAll({
-        raw: true,
-        nest: true,        
-        where: { productoId: productoId},
-        order: [['id', 'ASC']],
-        attributes: ["id", "label","productoId","coberturaId"]               
-      })
-        .then((productos) =>
-          resolve(productos)
-        )
-        .catch((reason) => reject(reason));
-    });
-  } 	
+ 	
   
 }
 
 export default ProductoCoberturaService;
+
+

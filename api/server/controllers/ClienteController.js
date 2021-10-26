@@ -2,78 +2,193 @@ import ClienteService from "../services/ClienteService";
 
 class ClienteController {
 
-  static loginmobil(req, res) {
-    const { facebookId, nombres, email } = req.body;
-      ClienteService.login(facebookId)
-        .then((user) => {
-         if(user.cliente){
-            res.status(200).send({ result: user});                                                   
-         }else{           
-            /*-----------------------------*/
-            ClienteService.add(req.body)
-            .then((rescliente) => {
-                ClienteService.login(rescliente.cliente.facebookId)
-                  .then((zuser) => {
-                    res.status(200).send({ result: zuser});
-                  })
+  static setUpdateMobil(req, res) { 
+      ClienteService.getFacebookId(req.params.id)
+         .then((xrow) => {		
+	   if(xrow)
+		 {
+             ClienteService.update(req.body,xrow.id)
+        	.then((row) => {
+	           res.status(200).send({result: row, message: 'Cliente actualizado' });
+
+        	}) }else{
+		   res.status(200).send({result: null, message: 'No existe cliente' });
+		}
+        })		 
+        .catch((reason) => { 
+          console.log(reason)		
+          res.status(400).send({ message: reason.parent.detail });
+        });
+  }
+	
+  static getLogin(req, res) {   
+    const { facebookId,nombres, email } = req.body         
+    ClienteService.login(facebookId)
+      .then((row) => {                 
+        if(row.cliente){
+          res.status(200).send({result: row });
+        } else{
+          ClienteService.add(req.body)
+            .then((xcliente)=>{
+              ClienteService.login(facebookId)
+                .then((xrow) =>{
+                  res.status(200).send({result: xrow });      
+                })
             })
-            .catch((reason) => {          
-             console.log(reason)		    
-            res.status(400).send({ message: reason });
+            .catch((reason) => {              	
+              res.status(400).send({ message: reason });
             });
-            /*-----------------------------*/
-         }
-        })	      
-	  
-      .catch((reason) => {  
-        console.log(reason)           
+        }                                            
+      })                   
+      .catch((reason) => {              	
+        res.status(400).send({ message: reason });
+      });
+  }
+  static getMobilItem(req, res) {    
+    ClienteService.getFacebookId(req.params.id)
+      .then((row) => {                      
+        res.status(200).send({result: row });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
+
+  static getData(req, res) {        
+    ClienteService.data(req.params.page,req.params.num,req.params.prop,req.params.orden)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              	
         res.status(400).send({ message: reason });
       });
   }
 
-  static lista(req, res) {        
-    ClienteService.getAll(req.params.page,req.params.num,req.params.prop,req.params.orden) 
-      .then((result) => {
-           res.status(200).send({ result: result });                
-          })        
-      .catch((reason) => {          
-        res.status(400).send({ reason });
-      });   
-}
+  static getItem(req, res) {    
+    ClienteService.item(req.params.id)
+      .then((row) => {                      
+        res.status(200).send({result: row });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
+  }
+  static setAdd(req, res) {   
+    const { nombres } = req.body 
+    if(nombres){
+    if(req.params.tipo === 'lista')
+    {
+      ClienteService.add(req.body)
+        .then((row) => {                      
+          ClienteService.data(1,12,'nombres','ASC')
+            .then((rows) => {               
+              res.status(200).send({result: rows, message: 'Cliente registrado' });                        
+            })
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason.parent.detail });
+      });
+    }else{
+      ClienteService.add(req.body)
+        .then((row) => {                      
+          res.status(200).send({result: row, message: 'Cliente registrado' });                        
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason.parent.detail });
+      });
+    }  
+   }else{
+    res.status(400).send({ message: "datos faltantes" });
+   }
+  }
+  
+  static setUpdate(req, res) {       
+    if(req.params.tipo === 'lista')
+    {
+      ClienteService.update(req.body,req.params.id)
+        .then((row) => {
+           ClienteService.data(1,12,'nombres','ASC')
+             .then((rows) => {               
+                res.status(200).send({result: rows, message: 'Cliente actualizado' });                        
+             })
+        })                        
+        .catch((reason) => {              
+          res.status(400).send({ message: reason.parent.detail });
+        });
+    } else{
+      ClienteService.update(req.body,req.params.id)
+        .then((row) => {                      
+            ClienteService.item(req.params.id)
+                .then((row) => {                      
+                  res.status(200).send({result: row, message: 'Cliente actualizado' });                        
+            })                     
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason.parent.detail });
+        });
+    }  
+  }
+
+  static getDelete(req, res) {    
+    if(req.params.tipo === 'lista')
+    {
+      ClienteService.delete(req.params.id)
+        .then((row) => {                      
+          ClienteService.data(1,12,'nombres','ASC')
+            .then((rows) => {    
+              res.status(200).send({result: rows, message: 'Cliente eliminado' });      
+            })
+        })                   
+        .catch((reason) => {                
+          res.status(400).send({ message: reason.parent.detail });
+      });
+    }else{
+      ClienteService.delete(req.params.id)
+        .then((row) => {                      
+          res.status(200).send({result: row, message: 'Cliente eliminado' });
+        })                   
+        .catch((reason) => {              
+          res.status(400).send({ message: reason.parent.detail });
+      });
+    }  
+  }
+
  
 
-  static item(req, res) {                 
-    ClienteService.getItem(req.params.id) 
-           .then((cliente) => {
-                res.status(200).send({ result: cliente });                
-            })        
-        .catch((reason) => {                  
-          res.status(400).send({ reason });
-        });   
+  static getSearch(req, res) {    
+    const {nombres } = req.body    
+    ClienteService.search(nombres)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {      
+        console.log(reason)        
+        res.status(400).send({ message: reason });
+    });
+  }
+  static getList(req, res) {    
+    ClienteService.list(req.params.prop,req.params.value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
   }
 
-  static mitem(req, res) {
-    ClienteService.getFacebookId(req.params.id)
-           .then((cliente) => {
-                res.status(200).send({ result: cliente });
-            })
-        .catch((reason) => { 
-          res.status(400).send({ reason });
-        });
-  }
+  
 
-
-  static search(req, res) {              
-    const { nombres, ci, telefono } = req.body
-      ClienteService.search(nombres,ci,telefono) 
-           .then((result) => {
-                res.status(200).send({ result: result });                
-            })        
-        .catch((reason) => {          
-          res.status(400).send({ reason });
-        });   
+  static getItems(req, res) {    
+    ClienteService.items(req.params.prop,req.params.value)
+      .then((rows) => {                      
+        res.status(200).send({result: rows });                        
+      })                   
+      .catch((reason) => {              
+        res.status(400).send({ message: reason });
+    });
   }
-  static buscar(req, res) { 
+ 
+ static buscar(req, res) { 
       ClienteService.buscar(req.params.nombre)
            .then((result) => {
                 res.status(200).send({ result: result });
@@ -81,71 +196,7 @@ class ClienteController {
         .catch((reason) => {        
           res.status(400).send({ reason });
         });
-  }	
-
-
-
-  static add(req, res) {    
-    ClienteService.add(req.body)
-      .then((result) => {            
-          ClienteService.getAll(1,12,"nombres","ASC")
-              .then((result) => {
-                  res.status(200).send({ data: result });
-              })
-          })        
-      .catch((reason) => {          
-       res.status(400).send({ message: reason.message });
-      });   
-}
-
- static updates(req, res) {
-    ClienteService.update(req.body, req.params.id)
-      .then((cliente) => {          
-	      ClienteService.getAll(1,12,"nombres","ASC")
-              .then((resto) => {
-                  res.status(200).send({ result: resto });
-              })
-        })
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message, cliente: null });
-      });
-  }
-
-  static registro(req, res) {    
-    ClienteService.add(req.body)
-      .then((result) => {
-           res.status(200).send({ result });
-          })
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message });
-      });
- }
-
-  static update(req, res) {
-    ClienteService.getFacebookId(req.params.id)
-      .then((cliente) => {
-        ClienteService.update(req.body, cliente.id)
-          .then((cls) => {
-            res.status(200).send({ message:'Cliente actualizado', cls });
-          })
-       })     
-      .catch((reason) => {	
-        res.status(400).send({ message: reason.message, cliente: null });
-      });
-  }
-
-  static delete(req, res) {
-    ClienteService.delete(req.params.id)
-      .then((cliente) => {        
-          ClienteService.getAll(1,12,"nombres","ASC") 
-            .then((result) => {
-                res.status(200).send({ message:'Cliente eliminado', data: result });
-            })
-        })
-      .catch((reason) => {
-        res.status(400).send({ message: reason.message, data: null });
-      });
-  }
+  }		
   
 }
 
